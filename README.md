@@ -2,8 +2,8 @@
 A Chrome extension for making Youtube less distracting.
 
 ## Features
-- Removing comments
-- Removing suggestions
+- Remove comments
+- Remove video suggestions
 - Theater mode by default
 
 ## TODO
