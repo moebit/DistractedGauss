@@ -1,0 +1,23 @@
+{
+	"name": "Distracted Gauss",
+	"version": "0.0.1",
+	"manifest_version": 2,
+	"description": "A chrome extension for a distracted bubbly life.",
+	"browser_action": {
+		"default_title": "Distracted Gauss",
+		"default_popup": "attentionCenter.html"
+	},
+	"background": {
+		"scripts": ["js/background.js"],
+		"persistent": true
+		},
+	"author": "moebit",
+	"permissions": [
+		"tabs",
+		"background",
+		"storage",
+		"cookies",
+		"unlimitedStorage",
+		"*://*.youtube.com/*"
+	]
+}
