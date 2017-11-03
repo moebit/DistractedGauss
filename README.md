@@ -1,3 +1,7 @@
+<p>
+<img src="icon/youtube-icon.png" width="128"/>
+</p>
+
 # DistractedGauss
 A Chrome extension for making Youtube less distracting.
 
