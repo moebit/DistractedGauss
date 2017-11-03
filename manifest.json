@@ -3,6 +3,7 @@
 	"version": "0.0.1",
 	"manifest_version": 2,
 	"description": "A chrome extension for a distracted bubbly life.",
+	"icons": {"48": "icon/youtube-icon.png"},
 	"browser_action": {
 		"default_title": "Distracted Gauss",
 		"default_popup": "attentionCenter.html"
