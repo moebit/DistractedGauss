@@ -9,7 +9,7 @@ A Chrome extension for making Youtube less distracting.
 - Remove comments
 - Remove video suggestions
 - Theater mode by default
-- Replay mode for repeating videos (if off by default)
+- Replay mode for repeating videos (off by default)
 
 ## TODO
 - Remove auto play
