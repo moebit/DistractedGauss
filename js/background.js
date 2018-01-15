@@ -1,12 +1,13 @@
 "use strict";
 
 //initialization
-chrome.storage.local.set({'isRunning': true, 'removeSug': true, 'theaterMode': true, 'removeComments': true, 'replayMode': false});
+chrome.storage.local.set({'isRunning': true, 'removeSug': true, 'theaterMode': true, 'removeComments': true, 'replayMode': false, 'stopAutoPlayMode': true});
 var isRunning = true;
 var removeSug = true;
 var theaterMode = true;
 var removeCom = true;
 var replayMode = false;
+var stopAutoPlayMode = true;
 
 //inject code
 const removeSuggestions = ` 
@@ -18,7 +19,7 @@ const removeComments = `
 //We set wide = 1 or 0 in cookies for theater mode
 
 const replay = `document.getElementsByClassName('ytp-play-button ytp-button')[0].click();`;
-
+const autoplay = `document.querySelector('#toggle').click();`;
 
 //popup
 chrome.browserAction.onClicked.addListener(() => { chrome.tabs.create({url: chrome.extension.getURL('attentionCenter.html'), "active": true}) });
@@ -47,7 +48,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         var injectedJSCode = 'document.addEventListener("DOMSubtreeModified", () => {';
         if (isSubstring('.youtube.', tab.url) &&  isRunning) {
             var observerJSCode = `
-            if (observer) { observer.disconnect(); }
+            if (typeof(observer) !== 'undefined' ) { observer.disconnect(); }
             var button_node = document.getElementsByClassName('ytp-play-button ytp-button')[0];
             var config = { attributes: true };
             var observer = new MutationObserver((mutationsList) => {
@@ -59,13 +60,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                     }
                 }
             });`;
+            injectedJSCode += (stopAutoPlayMode ? autoplay : '');
             injectedJSCode += (removeSug ? removeSuggestions : '');
             injectedJSCode += (removeCom ? removeComments : '');
-            injectedJSCode += (replayMode ? observerJSCode + 'observer.observe(button_node, config);' : 'if (observer) { observer.disconnect(); }');
+            injectedJSCode += (replayMode ? observerJSCode + 'observer.observe(button_node, config);' : 'if (typeof(observer) !== "undefined") { observer.disconnect(); }');
             injectedJSCode += '});'
-            console.log(injectedJSCode);
             chrome.tabs.executeScript(tabId, {code: injectedJSCode});
-            console.log(tab.url);
             //set wide = 1 for theater mode, wide = 0 for non-theater mode
             theaterMode ? (chrome.cookies.remove({url: tab.url, name: "wide"}), chrome.cookies.set({url: tab.url, name: "wide", value: "1"})) 
             : (chrome.cookies.remove({url: tab.url, name: "wide"}), chrome.cookies.set({utl: tab.url, name: "wide", value: "0"}));
@@ -74,13 +74,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 //update settings
 var refreshSettings = () => {
-    chrome.storage.local.get(['isRunning', 'removeSug', 'theaterMode', 'removeComments', 'replayMode'], value => 
+    chrome.storage.local.get(['isRunning', 'removeSug', 'theaterMode', 'removeComments', 'replayMode', 'stopAutoPlayMode'], value => 
     {
       isRunning = value["isRunning"];
       removeSug = value["removeSug"];
       theaterMode = value["theaterMode"];
       removeCom = value["removeComments"];
       replayMode = value["replayMode"];
+      stopAutoPlayMode = value["stopAutoPlayMode"];
     });
   };
 //check string
