@@ -25,7 +25,7 @@ var saveSettings = () => {
         "theaterMode": document.getElementById('theatermode').checked,
         "removeComments": document.getElementById('remove-comments').checked,
         "replayMode": document.getElementById('replaymode').checked,
-        "stopAutoPlayeMode": document.getElementById('stopautoplaymode').checked
+        "stopAutoPlayMode": document.getElementById('stopautoplaymode').checked
     });
     controlCommand("save_settings");
 };

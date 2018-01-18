@@ -18,9 +18,15 @@ const removeComments = `
     comments != null ? comments.remove() : null;`;
 //We set wide = 1 or 0 in cookies for theater mode
 
-const replay = `document.getElementsByClassName('ytp-play-button ytp-button')[0].click();`;
-const autoplay = `document.querySelector('#toggle').click();`;
-
+const replay = `
+    if (document.getElementsByClassName('ytp-play-button ytp-button')[0]) {
+        document.getElementsByClassName('ytp-play-button ytp-button')[0].click();
+    }`;
+const autoplay = `
+    if (document.querySelector('.ytp-upnext-cancel-button')) { 
+        document.querySelector('.ytp-upnext-cancel-button').click();
+    }`;
+    
 //popup
 chrome.browserAction.onClicked.addListener(() => { chrome.tabs.create({url: chrome.extension.getURL('attentionCenter.html'), "active": true}) });
 
@@ -47,23 +53,58 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete'){ 
         var injectedJSCode = 'document.addEventListener("DOMSubtreeModified", () => {';
         if (isSubstring('.youtube.', tab.url) &&  isRunning) {
-            var observerJSCode = `
-            if (typeof(observer) !== 'undefined' ) { observer.disconnect(); }
-            var button_node = document.getElementsByClassName('ytp-play-button ytp-button')[0];
-            var config = { attributes: true };
-            var observer = new MutationObserver((mutationsList) => {
-                for(var mutation of mutationsList) {
-                    if (mutation.type == 'attributes') {
-                        if (button_node.getAttribute(mutation.attributeName) == 'Replay'){`
-                        + (replayMode ? replay : 'console.log("disabled");') +
-                       `}
+            var SAP = (stopAutoPlayMode && !replayMode ? autoplay : 'console.log("stop autoplay disabled");');
+            var RM = (replayMode ? replay : 'console.log("replay is disabled");');
+            var observerNextButtonJSCode = `
+            if (typeof(observerNextBtn) !== 'undefined' ) { observerNextBtn.disconnect(); }
+            var next_btn_node = document.querySelector('#movie_player > div.ytp-upnext.ytp-suggestion-set.ytp-upnext-autoplay-paused');
+            var nxt_btn_config = { attributes: true };
+            if(next_btn_node != null && document.querySelector('.ytp-upnext-cancel-button') != null){
+                var observerNextBtn = new MutationObserver((mutationsList) => {
+                    for(let mutation of mutationsList) {
+                        if (mutation.type == 'attributes') {
+                            console.log("before");
+                            console.log(mutation.target.style.display);
+                            if (mutation.attributeName !== 'style') return;
+                            if (mutation.target.style.display !== "none") {
+                                console.log("after");
+                                console.log(mutation.target.style.display);
+                               ` + SAP + `
+                            }
+                        }
                     }
-                }
-            });`;
-            injectedJSCode += (stopAutoPlayMode ? autoplay : '');
+                });
+            }`;
+            var observerAutoReplayJSCode = `
+            if (typeof(observerAutoReplay) !== 'undefined' ) { observerAutoReplay.disconnect(); }
+            var button_node = document.getElementsByClassName('ytp-play-button ytp-button')[0];
+            var replay_config = { attributes: true };
+            if(button_node != null && document.querySelector('.ytp-upnext-cancel-button') != null){
+                var observerAutoReplay = new MutationObserver((mutationsList) => {
+                    for(let mutation of mutationsList) {
+                        if (mutation.type == 'attributes') {
+                            if (button_node.getAttribute(mutation.attributeName) == 'Replay'){
+                            ` + RM + `
+                            }
+                        }
+                    }
+                });
+            }`;
             injectedJSCode += (removeSug ? removeSuggestions : '');
             injectedJSCode += (removeCom ? removeComments : '');
-            injectedJSCode += (replayMode ? observerJSCode + 'observer.observe(button_node, config);' : 'if (typeof(observer) !== "undefined") { observer.disconnect(); }');
+            injectedJSCode += (stopAutoPlayMode ? observerNextButtonJSCode + `
+                if (typeof(observerNextBtn) !== "undefined") { observerNextBtn.observe(next_btn_node, nxt_btn_config) };
+                ` 
+                : `
+                if (typeof(observerNextBtn) !== "undefined") { observerNextBtn.disconnect(); };
+                `);
+            injectedJSCode += (replayMode ? observerAutoReplayJSCode + `
+                if (typeof(observerAutoReplay) !== "undefined") { observerAutoReplay.observe(button_node, replay_config) };
+                `
+                : `
+                if (typeof(observerAutoReplay) !== "undefined") { observerAutoReplay.disconnect(); }
+                `);
+            
             injectedJSCode += '});'
             chrome.tabs.executeScript(tabId, {code: injectedJSCode});
             //set wide = 1 for theater mode, wide = 0 for non-theater mode
