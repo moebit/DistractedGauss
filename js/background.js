@@ -11,10 +11,10 @@ var stopAutoPlayMode = true;
 
 //inject code
 const removeSuggestions = ` 
-    var suggest = document.querySelector("ytd-watch-next-secondary-results-renderer");
+    var suggest = document.querySelector("#watch7-sidebar-contents");
     suggest != null ? suggest.remove() : null;`;
 const removeComments = `
-    var comments = document.querySelector("ytd-comments");
+    var comments = document.querySelector("#watch-discussion");
     comments != null ? comments.remove() : null;`;
 //We set wide = 1 or 0 in cookies for theater mode
 
@@ -64,12 +64,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                     for(let mutation of mutationsList) {
                         if (mutation.type == 'attributes') {
                             console.log("before");
-                            console.log(mutation.target.style.display);
+                            console.log("before" + mutation.target.style.display);
                             if (mutation.attributeName !== 'style') return;
                             if (mutation.target.style.display !== "none") {
                                 console.log("after");
-                                console.log(mutation.target.style.display);
-                               ` + SAP + `
+                                console.log("after" + mutation.target.style.display);
+                             ` + SAP + `
                             }
                         }
                     }
