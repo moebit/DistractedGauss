@@ -11,10 +11,10 @@ var stopAutoPlayMode = true;
 
 //inject code
 const removeSuggestions = ` 
-    var suggest = document.querySelector("#watch7-sidebar-contents");
+    var suggest = document.querySelector("#related");
     suggest != null ? suggest.remove() : null;`;
 const removeComments = `
-    var comments = document.querySelector("#watch-discussion");
+    var comments = document.querySelector("#comments");
     comments != null ? comments.remove() : null;`;
 //We set wide = 1 or 0 in cookies for theater mode
 
