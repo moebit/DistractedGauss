@@ -43,7 +43,6 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
             break;
         case 'refreshSettings':
             refreshSettings();
-            console.log(isRunning)
             break;
     }
 });
@@ -63,12 +62,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 var observerNextBtn = new MutationObserver((mutationsList) => {
                     for(let mutation of mutationsList) {
                         if (mutation.type == 'attributes') {
-                            console.log("before");
-                            console.log("before" + mutation.target.style.display);
                             if (mutation.attributeName !== 'style') return;
                             if (mutation.target.style.display !== "none") {
-                                console.log("after");
-                                console.log("after" + mutation.target.style.display);
                              ` + SAP + `
                             }
                         }
